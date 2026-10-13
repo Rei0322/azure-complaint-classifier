@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "Azure Complaint Classifier"
+abstract: "Multimodal customer complaint classifier on Azure OpenAI: transcribes audio complaints with Whisper, generates an image of the issue with gpt-image-1-mini, describes and annotates it with GPT-4o vision, and classifies it into a product category."
+type: software
+authors:
+  - family-names: "Ray"
+    given-names: "Samira N."
+repository-code: "https://github.com/Rei0322/azure-complaint-classifier"
+license: MIT
+keywords:
+  - azure-openai
+  - generative-ai
+  - whisper
+  - gpt-4o
+  - image-generation
+  - multimodal
