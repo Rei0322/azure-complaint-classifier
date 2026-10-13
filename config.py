@@ -46,9 +46,31 @@ def get_client(api_version):
     )
 
 
+AUDIO_EXTENSIONS = (".mp3", ".wav", ".m4a", ".mp4", ".mpeg", ".mpga", ".webm", ".ogg")
+
+
+def find_audio_files():
+    """
+    Return every complaint recording under audio/ as (complaint_id, path) pairs.
+
+    Supports audio/customer1/audio.mp3 style folders (the id is the folder name)
+    and loose files like audio/complaint.mp3 (the id is the file name).
+    """
+    found = []
+    for root, _dirs, files in os.walk(AUDIO_DIR):
+        for name in sorted(files):
+            if name.lower().endswith(AUDIO_EXTENSIONS):
+                path = os.path.join(root, name)
+                if root == AUDIO_DIR:
+                    complaint_id = os.path.splitext(name)[0]
+                else:
+                    complaint_id = os.path.relpath(root, AUDIO_DIR).replace(os.sep, "_")
+                found.append((complaint_id, path))
+    if not found:
+        raise FileNotFoundError(f"No audio files found in {AUDIO_DIR}. Add the complaint recordings there.")
+    return sorted(found)
+
+
 def find_audio_file():
-    """Return the first audio file found in the audio/ folder."""
-    for name in sorted(os.listdir(AUDIO_DIR)):
-        if name.lower().endswith((".mp3", ".wav", ".m4a", ".mp4", ".mpeg", ".mpga", ".webm", ".ogg")):
-            return os.path.join(AUDIO_DIR, name)
-    raise FileNotFoundError(f"No audio file found in {AUDIO_DIR}. Add the complaint recording there.")
+    """Return the path of the first complaint recording found under audio/."""
+    return find_audio_files()[0][1]
