@@ -4,11 +4,17 @@
   "audio_file": "audio/customer2/audio.mp3",
   "transcription": "Hi, I am contacting you regarding a pair of shoes I recently purchased, unfortunately the quality is far from what I expected. As you can see the shoe is completely ruined, the material is torn and there is significant damage to the front. This is not something that should happen with a new pair of shoes and I am extremely disappointed. I am requesting a refund or a replacement as soon as possible, please let me know how to proceed with the return process. Thank you for your attention to this matter.",
   "image_prompt": "A realistic, well-lit product photo that clearly shows the problem described in this customer complaint: \"Hi, I am contacting you regarding a pair of shoes I recently purchased, unfortunately the quality is far from what I expected. As you can see the shoe is completely ruined, the material is torn and there is significant damage to the front. This is not something that should happen with a new pair of shoes and I am extremely disappointed. I am requesting a refund or a replacement as soon as possible, please let me know how to proceed with the return process. Thank you for your attention to this matter.\". Focus on the damaged or defective product so the issue is easy to see. No text, no logos, no people's faces.",
-  "generated_image": "output/customer2/3_generated_image.png",
+  "generated_image": "output/customer2/generated_image.png",
   "image_description": "The image shows a brown leather shoe with visible damage to the front. The material is torn, exposing the inner layers, and the shoe appears to be in poor condition. The background is a plain beige surface.",
   "reported_issue": "Torn material on the front of the shoe",
-  "annotated_image": "output/customer2/5_annotated_image.png",
+  "annotated_image": "output/customer2/annotated_image.png",
   "category": "Fashion",
   "subcategory": "Shoes & Accessories",
-  "reason": "The complaint is about the quality and damage of a pair of shoes, which falls under the 'Shoes & Accessories' subcategory in the 'Fashion' category."
+  "reason": "The complaint is about the quality and damage of a pair of shoes, which falls under the 'Shoes & Accessories' subcategory in the 'Fashion' category.",
+  "bounding_box": [
+    0.2,
+    0.5,
+    0.6,
+    0.8
+  ]
 }

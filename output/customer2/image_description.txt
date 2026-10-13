@@ -1,0 +1,3 @@
+Description: The image shows a brown leather shoe with visible damage to the front. The material is torn, exposing the inner layers, and the shoe appears to be in poor condition. The background is a plain beige surface.
+Reported issue: Torn material on the front of the shoe
+Issue location (fraction of image, x_min, y_min, x_max, y_max): 0.20, 0.50, 0.60, 0.80

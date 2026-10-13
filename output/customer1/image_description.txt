@@ -1,0 +1,3 @@
+Description: The image shows a brown leather shoe with significant damage to the front area. The material is torn, exposing the inner lining and sole. The shoe is placed on a neutral, light-colored surface.
+Reported issue: Torn material and significant damage to the front of the shoe.
+Issue location (fraction of image, x_min, y_min, x_max, y_max): 0.10, 0.60, 0.50, 0.90

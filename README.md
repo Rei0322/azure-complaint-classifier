@@ -1,79 +1,83 @@
-# Customer Complaint Classification Starter Project
+# Azure Complaint Classifier
 
-## Overview
+A multimodal generative AI pipeline on **Azure OpenAI** that turns a customer's **spoken complaint** into a **categorized support ticket with visual evidence**. It transcribes the audio, generates an image of the reported problem, has a vision model describe the image and locate the issue, draws a box around it, and classifies the complaint into a product category and subcategory.
 
-This starter project aims to help you learn and implement a generative AI-based solution for classifying customer complaints. The project involves various steps such as transcribing customer audio complaints, generating images, describing and annotating those images, and finally classifying the complaints into appropriate categories. By working through this project, you will get hands-on experience with multiple AI models and the practical integration of generative AI in a real-world scenario.
+*Udacity Azure Generative AI Engineer Nanodegree, Project 3: Customer Complaint Classification*
 
-In addition to executing each of these steps, it is important to store the intermediate results after each stage. This will help in project evaluation and debugging, as well as allow you to understand how each step contributes to the final outcome.
+| Generated image | Annotated issue |
+|---|---|
+| ![Generated image](output/customer2/generated_image.png) | ![Annotated image](output/customer2/annotated_image.png) |
 
-1. **Transcribing Customer Audio Complaint**:
+> **Customer 2:** *"…the shoe is completely ruined, the material is torn and there is significant damage to the front…"*
+> **Classified as:** Fashion > Shoes & Accessories
 
-   - The first step is to convert the customer's audio complaint into text using a speech-to-text model. This involves using the `whisper.py` module.
+## How it works
 
-2. **Create Prompt from Transcription**:
+```
+audio/customerN/audio.mp3
+   │
+   ▼  whisper.py   Whisper            → transcription.txt
+   ▼  dalle.py     prompt builder     → image_prompt.txt
+   ▼  dalle.py     gpt-image-1-mini   → generated_image.png
+   ▼  vision.py    GPT-4o (vision)    → image_description.txt  (description, issue, bounding box)
+   ▼  vision.py    Pillow             → annotated_image.png
+   ▼  gpt.py       GPT-4o + catalog   → classification.txt     (category / subcategory / reason)
+   ▼  main.py      orchestration      → summary.json, all_results.json
+```
 
-   - Once the audio is transcribed, a prompt is created from the transcription that will be used to generate a visual representation of the complaint.
+| File | Role |
+|---|---|
+| `main.py` | Runs the six steps for every recording in `audio/` and saves each intermediate result |
+| `whisper.py` | `transcribe_audio()`: speech-to-text with Whisper |
+| `dalle.py` | `create_image_prompt()` and `generate_image()`: builds a photo-style prompt and saves the generated image |
+| `vision.py` | `describe_image()` and `annotate_image()`: GPT-4o returns a description, the issue, and a bounding box as JSON, then Pillow draws a labeled box |
+| `gpt.py` | `classify_with_gpt()`: picks a category/subcategory from `categories.json` with JSON-mode output and checks the pair actually exists in the catalog |
+| `config.py` | Loads the endpoint, key, deployment names, and API versions from `.env`, and creates the Azure OpenAI client |
 
-3. **Generate Image Representing the Issue**:
+## Results
 
-   - Using the prompt created from the transcription, an image is generated to visually represent the customer complaint. This is managed by the `dalle.py` module.
+| | Customer 1 | Customer 2 |
+|---|---|---|
+| Complaint | New shoes arrived with torn material and damage to the front | Same issue, separate recording |
+| Issue found by vision model | Torn material and significant damage to the front of the shoe | Torn material on the front of the shoe |
+| Classification | **Fashion > Shoes & Accessories** | **Fashion > Shoes & Accessories** |
 
-4. **Describe the Generated Image**:
+Every output is in [`output/customer1/`](output/customer1) and [`output/customer2/`](output/customer2):
+`transcription.txt` · `image_prompt.txt` · `generated_image.png` · `image_description.txt` · `annotated_image.png` · `classification.txt` · `summary.json`
 
-   - The generated image is then analyzed to provide a description of its contents, using the `vision.py` module. This helps identify the key elements related to the issue.
+## Run it yourself
 
-5. **Annotate the Reported Issue in the Image**:
+**Azure setup:** one Azure OpenAI / AI Foundry resource with three deployments: `whisper`, `gpt-image-1-mini`, and `gpt-4o`. East US 2 offers all three.
 
-   - The key reported issue in the image is highlighted through annotation, which includes identifying specific objects or areas related to the complaint.
+```bash
+git clone https://github.com/Rei0322/azure-complaint-classifier
+cd azure-complaint-classifier
+cp .env.example .env          # then add your endpoint and key
+pip install -r requirements.txt
+python main.py                # all complaints
+python main.py customer1      # or just one
+```
 
-6. **Classify Complaint into Category/Subcategory Pair**:
-   - Use the generated image description and the catalog metadata to classify the complaint into a category and subcategory. This is handled by the `gpt.py` module.
+Each module can also be run alone for testing, for example `python gpt.py`.
 
-***It is recommended to store the intermediate results after this step as well, to ensure that all stages of the process can be reviewed for evaluation.***
+## Design decisions
 
-## File Structure
+- **gpt-image-1-mini instead of DALL-E 3.** DALL-E 3 was no longer available to deploy, and gpt-image-1-mini is its current replacement. `dalle.py` handles both response formats (URL or base64), so either model works.
+- **Structured outputs.** The vision and classification steps ask for JSON, so the bounding box and category can be used directly in code. The classifier also checks its answer against `categories.json` and flags any invented category.
+- **Grounding the image prompt.** The prompt asks for a realistic product photo focused on the defect, with no text or faces, so the vision step has a clear issue to find.
+- **Secrets stay out of the repo.** The endpoint and key load from `.env`, which `.gitignore` excludes. `.env.example` shows the format.
+- **Cost-aware testing.** `python main.py customer1` runs a single complaint. A full run costs a few cents, mostly for the image generation.
 
-The project consists of the following files:
+## Lessons learned
 
-1. **`whisper.py`**:
+- A Foundry **project** URL (`…services.ai.azure.com/api/projects/…`) is not the same as the resource's **Azure OpenAI endpoint** (`…openai.azure.com/`). The SDK needs the second one, or it returns `API version not supported`.
+- Lab subscriptions can cap deployment size by policy (here, a 10K tokens-per-minute limit), so deployments had to be sized down to pass.
+- Model availability varies by region. Whisper and the image models are only offered in a few regions, so region choice comes before anything else.
 
-   - This file contains a function to transcribe audio complaints into text using the Whisper model. The implementation is left incomplete for you to practice.
+## Tech stack
 
-2. **`dalle.py`**:
+Python · Azure OpenAI (Whisper, gpt-image-1-mini, GPT-4o) · Azure AI Foundry · OpenAI Python SDK · Pillow · python-dotenv
 
-   - Contains the function `generate_image()` to create an image representing the issue. The function is partially complete with guidance comments.
+## License
 
-3. **`vision.py`**:
-
-   - This file contains a function to describe the generated image and annotate it with the key elements identified. The implementation is incomplete to allow you to practice building it.
-
-4. **`gpt.py`**:
-
-   - Contains a function `classify_with_gpt()` that takes in an image description and classifies the complaint into an appropriate category/subcategory. You are required to complete the logic.
-
-5. **`main.py`**:
-
-   - Orchestrates the entire workflow, calling each of the modules in sequence. The workflow steps are described in comments, and you are required to implement the logic to connect each module.
-
-## Learning Objectives
-
-- **Hands-on with Generative AI**: You will learn to implement generative AI models for real-world tasks such as image generation and language modeling.
-- **Practical Application of AI APIs**: Understand how to interact with various OpenAI APIs and apply them in a sequence to create an end-to-end solution.
-- **Image Annotation and Description**: Gain experience with describing and annotating images using AI, which is useful in many computer vision applications.
-
-## Prerequisites
-
-- Basic understanding of Python programming.
-- Familiarity with machine learning concepts and generative AI.
-- Recent reading or coursework on generative AI models
-
-## Helpful Tips
-
-- **Start Small**: Focus on completing one function at a time. Test each module individually before integrating it into the full workflow.
-- **Experiment with Prompts**: The quality of the generated image or classification can depend heavily on how the prompt is formulated. Experiment with different phrasing.
-- **API Documentation**: Refer to the OpenAI API documentation as you work through the project to understand what parameters are needed for each API call.
-
-## Resources
-
-- [OpenAI API Documentation](https://beta.openai.com/docs/)
-- [Python Documentation](https://docs.python.org/3/)
+MIT. See [LICENSE](LICENSE). Starter code structure and audio samples are from Udacity's course materials.

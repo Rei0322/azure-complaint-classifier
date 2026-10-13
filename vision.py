@@ -5,7 +5,7 @@ import json
 import os
 from mimetypes import guess_type
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 from config import get_client, GPT_DEPLOYMENT, GPT_API_VERSION, OUTPUT_DIR
 
@@ -75,6 +75,19 @@ def describe_image(image_path, complaint=""):
     return _parse_json(response.choices[0].message.content)
 
 
+def _label_font(size):
+    """Return a scalable TrueType font, falling back to Pillow's built-in font."""
+    for name in ("DejaVuSans-Bold.ttf", "arialbd.ttf", "Arial Bold.ttf"):
+        try:
+            return ImageFont.truetype(name, size)
+        except OSError:
+            continue
+    try:
+        return ImageFont.load_default(size=size)  # Pillow 10.1+
+    except TypeError:
+        return ImageFont.load_default()
+
+
 def annotate_image(image_path, issue, bounding_box, output_path=None):
     """
     Draws a labeled box around the reported issue and saves a new image.
@@ -99,11 +112,22 @@ def annotate_image(image_path, issue, bounding_box, output_path=None):
     line_width = max(4, width // 200)
     draw.rectangle(box, outline="red", width=line_width)
 
+    # Label sized to the image (about 3% of its height) so it stays readable.
     label = f"Issue: {issue}"
-    text_y = box[1] - 30 if box[1] > 30 else box[3] + 5
-    text_box = draw.textbbox((box[0], text_y), label)
-    draw.rectangle([text_box[0] - 4, text_box[1] - 4, text_box[2] + 4, text_box[3] + 4], fill="red")
-    draw.text((box[0], text_y), label, fill="white")
+    pad = max(6, height // 150)
+    size = max(16, height // 32)
+    font = _label_font(size)
+    # Shrink long labels until they fit across the image.
+    while size > 12 and draw.textlength(label, font=font) > width - 4 * pad:
+        size -= 2
+        font = _label_font(size)
+    label_height = draw.textbbox((0, 0), label, font=font)[3]
+    above = box[1] - label_height - 2 * pad
+    text_y = above if above > 0 else box[3] + pad
+    text_x = min(box[0], max(0, width - draw.textlength(label, font=font) - 2 * pad))
+    text_box = draw.textbbox((text_x, text_y), label, font=font)
+    draw.rectangle([text_box[0] - pad, text_box[1] - pad, text_box[2] + pad, text_box[3] + pad], fill="red")
+    draw.text((text_x, text_y), label, fill="white", font=font)
 
     image.save(output_path)
     return output_path

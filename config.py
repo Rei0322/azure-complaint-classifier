@@ -12,7 +12,7 @@ from openai import AzureOpenAI
 load_dotenv()
 
 # --- Azure OpenAI resource -------------------------------------------------
-AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT", "")   # e.g. https://<name>.openai.azure.com/
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT", "")   # e.g. https://<resource-name>.openai.azure.com/ (NOT the .../api/projects/... URL)
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "")
 
 # --- Deployment names (the names YOU gave the models in the lab) ------------
@@ -20,10 +20,10 @@ WHISPER_DEPLOYMENT = os.getenv("WHISPER_DEPLOYMENT", "whisper")
 DALLE_DEPLOYMENT = os.getenv("DALLE_DEPLOYMENT", "gpt-image-1-mini")
 GPT_DEPLOYMENT = os.getenv("GPT_DEPLOYMENT", "gpt-4o")
 
-# --- API versions (lab defaults; change only if the lab says otherwise) ---------
-WHISPER_API_VERSION = os.getenv("WHISPER_API_VERSION", "2024-06-01")
+# --- API versions (2025-04-01-preview supports audio, images, and chat) -----------
+WHISPER_API_VERSION = os.getenv("WHISPER_API_VERSION", "2025-04-01-preview")
 DALLE_API_VERSION = os.getenv("DALLE_API_VERSION", "2025-04-01-preview")
-GPT_API_VERSION = os.getenv("GPT_API_VERSION", "2024-10-21")
+GPT_API_VERSION = os.getenv("GPT_API_VERSION", "2025-04-01-preview")
 
 # --- Project paths --------------------------------------------------------------
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
