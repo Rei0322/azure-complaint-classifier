@@ -6,6 +6,7 @@ type: software
 authors:
   - family-names: "Ray"
     given-names: "Samira N."
+    orcid: "https://orcid.org/0009-0006-6885-8400"
 repository-code: "https://github.com/Rei0322/azure-complaint-classifier"
 license: MIT
 keywords:
