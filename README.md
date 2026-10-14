@@ -1,5 +1,7 @@
 # Azure Complaint Classifier
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23354088.svg)](https://doi.org/10.5281/zenodo.23354088)
+
 A multimodal generative AI pipeline on **Azure OpenAI** that turns a customer's **spoken complaint** into a **categorized support ticket with visual evidence**. It transcribes the audio, generates an image of the reported problem, has a vision model describe the image and locate the issue, draws a box around it, and classifies the complaint into a product category and subcategory.
 
 *Udacity Azure Generative AI Engineer Nanodegree, Project 3: Customer Complaint Classification*
